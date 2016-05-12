@@ -1,0 +1,24 @@
+#!/bin/bash
+# File will install httpd24 and curl, will update duckdns per the in-line configuration, 
+# 	and will do some permissions cleanup to make things work
+
+# This first part was taken from an AWS example,
+# 	it will install httpd24 and curl, then turns on httpd
+yum update -y
+yum install -y httpd24 curl 
+service httpd start
+chkconfig httpd on
+
+# This part performs the duckdns update and outputs the "OK" or "KO" response
+#	into a file in the www directory created by httpd24 installation
+curl -o "/var/www/html/duck.txt" "https://www.duckdns.org/update?domains={DUCKDNS_SUBDOMAIN}&token={DUCKDNS_TOKEN}"
+echo -e "\n"`date` >> /var/www/html/duck.txt
+
+# This final part performs the permissions cleanup from the AWS example
+groupadd www
+usermod -a -G www ec2-user
+chown -R root:www /var/www
+chmod 2775 /var/www
+find /var/www -type d -exec chmod 2775 {} +
+find /var/www -type f -exec chmod 0664 {} +
+
