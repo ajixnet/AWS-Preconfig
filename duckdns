@@ -23,11 +23,13 @@ find /var/www -type d -exec chmod 2775 {} +
 find /var/www -type f -exec chmod 0664 {} +
 
 # This next part tries to configure the vm to perform the duckdns update on startup
-# echo -E "description     \"runs duckdns update at startup\"" >> /etc/init/duckdns.conf
-# echo -E "start on startup" >> /etc/init/duckdns.conf
-# echo -E "task" >> /etc/init/duckdns.conf
-# echo -E "script" >> /etc/init/duckdns.conf
-# echo -E \"    curl -o "/var/www/html/duck.txt" "https://www.duckdns.org/update?domains={DUCKDNS_SUBDOMAIN}&token={DUCKDNS_TOKEN}\"" >> /etc/init/duckdns.conf
-# echo -E "   echo -e \n\`date\` >> /var/www/html/duck.txt" >> /etc/init/duckdns.conf
-# echo -E "   chown root:www /var/www/html/duck.txt" >> /etc/init/duckdns.conf
-# echo -E "end script" >> /etc/init/duckdns.conf
+echo -E "#!/bin/bash" > /home/ec2-user/duckdns.sh
+echo -E "# runs duckdns update" >> /home/ec2-user/duckdns.sh
+echo -E "curl -o "/var/www/html/duck.txt" "https://www.duckdns.org/update?domains={DUCKDNS_SUBDOMAIN}&token={DUCKDNS_TOKEN}\"" >> /home/ec2-user/duckdns.sh
+echo -E "echo -e \n\`date\` >> /var/www/html/duck.txt" >> /home/ec2-user/duckdns.sh
+echo -E "chown root:www /var/www/html/duck.txt" >> /home/ec2-user/duckdns.sh
+
+chmod +x /home/ec2-user/duckdns.sh
+
+echo -E "#!/bin/bash" > /etc/cron.hourly/duckdns
+echo -E "/home/ec2-user/duckdns.sh" >> /etc/cron.hourly/duckdns
