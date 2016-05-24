@@ -14,7 +14,7 @@ chkconfig httpd on
 curl -o "/var/www/html/duck.txt" "https://www.duckdns.org/update?domains={DUCKDNS_SUBDOMAIN}&token={DUCKDNS_TOKEN}"
 echo -e "\n"`date` >> /var/www/html/duck.txt
 
-# This final part performs the permissions cleanup from the AWS example
+# This part performs the permissions cleanup from the AWS example
 groupadd www
 usermod -a -G www ec2-user
 chown -R root:www /var/www
@@ -22,14 +22,7 @@ chmod 2775 /var/www
 find /var/www -type d -exec chmod 2775 {} +
 find /var/www -type f -exec chmod 0664 {} +
 
-# This next part tries to configure the vm to perform the duckdns update on startup
-echo -E "#!/bin/bash" > /home/ec2-user/duckdns.sh
-echo -E "# runs duckdns update" >> /home/ec2-user/duckdns.sh
-echo -E "curl -o "/var/www/html/duck.txt" "https://www.duckdns.org/update?domains={DUCKDNS_SUBDOMAIN}&token={DUCKDNS_TOKEN}\"" >> /home/ec2-user/duckdns.sh
-echo -E "echo -e \n\`date\` >> /var/www/html/duck.txt" >> /home/ec2-user/duckdns.sh
-echo -E "chown root:www /var/www/html/duck.txt" >> /home/ec2-user/duckdns.sh
-
+# This next part pulls the duckdns.sh script and the caller from this repository and puts them in the right spots
+curl -o "/home/ec2-user/duckdns.sh" "https://raw.githubusercontent.com/ajixnet/AWS-Preconfig/master/duckdns.sh"
 chmod +x /home/ec2-user/duckdns.sh
-
-echo -E "#!/bin/bash" > /etc/cron.hourly/duckdns
-echo -E "/home/ec2-user/duckdns.sh" >> /etc/cron.hourly/duckdns
+curl -o "/etc/cron.hourly/duckdns" "https://raw.githubusercontent.com/ajixnet/AWS-Preconfig/master/duckdns"
